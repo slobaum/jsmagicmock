@@ -1,0 +1,1 @@
+export {MagicMock} from './MagicMock';
