@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-var MagicMock = (function (root, factory) {
+(function (root, factory) {
     // eslint-disable-next-line no-undef
     if (typeof define === 'function' && define.amd) {
         // eslint-disable-next-line no-undef
@@ -7,7 +7,7 @@ var MagicMock = (function (root, factory) {
     } else if (typeof exports === 'object') {
         module.exports = factory();
     } else {
-        return root.MagicMock = factory();
+        root.MagicMock = factory();
     }
 }(this || {}, function () {
     function type(type, entity) { return typeof entity === type; };
