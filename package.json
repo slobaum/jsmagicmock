@@ -1,10 +1,10 @@
 {
   "name": "jsmagicmock",
   "version": "0.0.1",
-  "description": "A pure JavaScript implementation of Python's MagicMock",
+  "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest src"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/slobaum/jsmagicmock/issues"
   },
-  "homepage": "https://github.com/slobaum/jsmagicmock#readme"
+  "homepage": "https://github.com/slobaum/jsmagicmock#readme",
+  "keywords": [],
+  "dependencies": {
+    "jest": "26.4.2"
+  }
 }
