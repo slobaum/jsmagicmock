@@ -9,7 +9,7 @@
     } else {
         root.MagicMock = factory();
     }
-}(this || {}, function () {
+}(this, function () {
     function type(type, entity) { return typeof entity === type; };
     var isUndefined = type.bind(null, 'undefined');
     var isObject = type.bind(null, 'object');
@@ -25,28 +25,25 @@
             ? function() {}
             : prototype;
 
-        if (typeof prototype === 'object') {
+        if (isObject(prototype)) {
             // this converts the object into a callable with all the same properties
             prototype = Object.keys(prototype).reduce(
-                (acc, current) => {
-                    acc[current] = isObject(acc[current]) || isFunction(acc[current])
-                        ? MagicMock(acc[current])
-                        : acc[current];
+                function (acc, key) {
+                    acc[key] = isObject(prototype[key]) || isFunction(prototype[key])
+                        ? MagicMock(prototype[key])
+                        : prototype[key];
 
                     return acc;
                 },
                 function() {}
-            )
+            );
         }
 
         function ensureKey(obj, key) {
             if (!obj[key] && !deletedProps[key])
                 obj[key] = MagicMock();
 
-            // https://stackoverflow.com/a/42461846
-            return isFunction(obj[key])
-                ? obj[key].bind(obj)
-                : obj[key];
+            return obj[key];
         }
 
         return new Proxy(prototype, {
@@ -62,6 +59,14 @@
                         }
                     };
                 }
+
+                // if (key === 'toString') {
+                //     var actualProto = Object.getPrototypeOf(obj)
+
+                //     if (actualProto && actualProto.toString) {
+                //         return actualProto.toString.bind(obj);
+                //     }
+                // }
 
                 return ensureKey(obj, key);
             },
