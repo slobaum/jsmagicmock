@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
+  "files": [
+    "LICENSE.txt",
+    "package.json",
+    "README.md",
+    "src/index.js"
+  ],
   "scripts": {
     "test": "jest src"
   },
@@ -17,7 +23,7 @@
   },
   "homepage": "https://github.com/slobaum/jsmagicmock#readme",
   "keywords": [],
-  "dependencies": {
+  "devDependencies": {
     "jest": "26.4.2"
   }
 }

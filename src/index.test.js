@@ -2,17 +2,17 @@ const MagicMock = require('./index');
 
 describe('MagicMock suite', () => {
 
-    it('should instantiate', () => {
+    test('should instantiate', () => {
         expect(() => MagicMock()).not.toThrow();
     });
 
-    it('should return an entity for any arbitrary named key', () => {
+    test('should return an entity for any arbitrary named key', () => {
         const mock = MagicMock();
 
         expect(mock.whatever).not.toBeUndefined();
     });
 
-    it('should accept object properties via the constructor', () => {
+    test('should accept object properties via the constructor', () => {
         const mock = MagicMock({
             something: 'yep'
         });
@@ -20,7 +20,7 @@ describe('MagicMock suite', () => {
         expect(mock.something).toBe('yep');
     });
 
-    it('should accept deeply nested objects via the constructor', () => {
+    test('should accept deeply nested objects via the constructor', () => {
         const mock = MagicMock({
             something: {
                 somethingElse: {
@@ -32,7 +32,7 @@ describe('MagicMock suite', () => {
         expect(mock.something.somethingElse.onceMore).toBe('blarg');
     });
 
-    it('should allow assignment of arbitrarily named/dynamic keys', () => {
+    test('should allow assignment of arbitrarily named/dynamic keys', () => {
         const mock = MagicMock();
 
         mock.something.what.yes.i.made.all.this.up = 'something';
@@ -40,7 +40,7 @@ describe('MagicMock suite', () => {
         expect(mock.something.what.yes.i.made.all.this.up).toBe('something');
     });
 
-    it('should allow invocation of arbitrarily assigned keys', () => {
+    test('should allow invocation of arbitrarily assigned keys', () => {
         const mock = MagicMock();
 
         expect(() => {
@@ -49,24 +49,89 @@ describe('MagicMock suite', () => {
         }).not.toThrow();
     });
 
-    // it('should correctly implement toString', () => {
-    //     const literal = {something: 'what'};
-    //     const mock = MagicMock(literal);
+    test('"in" keyword with arbitrary keys', () => {
+        const mock = MagicMock();
 
-    //     expect(mock.toString()).toEqual(literal.toString());
-    // });
+        expect('something' in mock).toEqual(true);
+    });
+
+    test('"in" keyword with deeply nested arbitrary keys', () => {
+        const mock = MagicMock();
+
+        expect('something' in mock.whatever.something.else).toEqual(true);
+    });
+
+    describe('deleted keys', () => {
+
+        test('purposefully deleted keys should remain deleted', () => {
+            const mock = MagicMock();
+
+            delete mock.whatever;
+
+            expect(mock.whatever).toBeUndefined();
+        });
+
+        test('purposefully deleted deeply nested keys should remain deleted', () => {
+            const mock = MagicMock();
+
+            delete mock.something.i.made.up.whatever;
+
+            expect(mock.something.i.made.up).not.toBeUndefined();
+            expect(mock.something.i.made.up.whatever).toBeUndefined();
+        });
+
+        test('reassigning deleted keys works as expected', () => {
+            const mock = MagicMock();
+
+            delete mock.something.i.made.up;
+
+            expect(mock.something.i.made.up).toBeUndefined();
+
+            mock.something.i.made.up = 'i am back';
+
+            expect(mock.something.i.made.up).toEqual('i am back');
+        });
+    });
 
     describe('mock API', () => {
 
+        describe('setting return values', () => {
+
+            test('should return value specified via returnValue', () => {
+                const mock = MagicMock();
+
+                mock.__mock.returnValue('asdf')
+    
+                expect(mock()).toEqual('asdf');
+            });
+
+            test('should return the exact entity specified via returnValue', () => {
+                const mock = MagicMock();
+                const testReturnValue = Symbol('test-symbol');
+
+                mock.__mock.returnValue(testReturnValue)
+    
+                expect(mock()).toEqual(testReturnValue);
+            });
+
+            test('deeply nested entities should respect returnValue', () => {
+                const mock = MagicMock();
+
+                mock.i.made.this.up.__mock.returnValue('asdf')
+    
+                expect(mock.i.made.this.up()).toEqual('asdf');
+            });
+        });
+
         describe('with no calls', () => {
 
-            it('should have an empty calls array', () => {
+            test('should have an empty calls array', () => {
                 const mock = MagicMock();
     
                 expect(mock.__mock.calls).toEqual([]);
             });
 
-            it('should have a a property `called` that is false', () => {
+            test('should have a property `called` that is false', () => {
                 const mock = MagicMock();
     
                 expect(mock.__mock.called).toBe(false);
@@ -76,7 +141,7 @@ describe('MagicMock suite', () => {
 
         describe('with calls', () => {
 
-            it('number of entry in calls should match number of function calls', () => {
+            test('number of entry in calls should match number of function calls', () => {
                 const mock = MagicMock();
 
                 mock();
@@ -86,8 +151,36 @@ describe('MagicMock suite', () => {
                 expect(mock.__mock.calls.length).toBe(3);
             });
 
+            test('should have a property `called` that is true', () => {
+                const mock = MagicMock();
+
+                mock();
+    
+                expect(mock.__mock.called).toBe(true);
+            });
+
+            test('each call arguments should be available', () => {
+                const mock = MagicMock();
+
+                mock.something(1, 'a');
+                mock.something(2, 'b');
+
+                expect(mock.something.__mock.calls[0].arguments)
+                    .toEqual([1, 'a']);
+                expect(mock.something.__mock.calls[1].arguments)
+                    .toEqual([2, 'b']);
+                expect(mock.something.__mock.calls[2])
+                    .toBeUndefined();
+            });
+
+            test('calls should remain scoped to their object path', () => {
+                const mock = MagicMock();
+
+                mock.something(1, 'a');
+
+                expect(mock.__mock.called).toBe(false);
+                expect(mock.something.__mock.called).toBe(true);
+            });
         });
-
     });
-
 });

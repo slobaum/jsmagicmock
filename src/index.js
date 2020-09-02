@@ -20,7 +20,6 @@
         var deletedProps = {};
         var calls = [];
         var returnValue = unsetReturnValueSymbol;
-        // var prototype = Object.getPrototypeOf(mocked);
 
         mocked = isUndefined(mocked)
             ? function() {}
@@ -60,10 +59,6 @@
                         }
                     };
                 }
-
-                // if (key === 'toString' && prototype && isFunction(prototype.toString)) {
-                //     return prototype.toString.bind(obj);
-                // }
 
                 return ensureKey(obj, key);
             },
