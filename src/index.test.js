@@ -61,6 +61,48 @@ describe('MagicMock suite', () => {
         expect('something' in mock.whatever.something.else).toEqual(true);
     });
 
+    test('indexed properties', () => {
+        const mock = MagicMock(['a', 'b']);
+
+        expect(mock[0]).toEqual('a');
+        expect(mock[1]).toEqual('b');
+    });
+
+    test('deeply nested indexed properties', () => {
+        const mock = MagicMock({
+            something: ['a', 'b']
+        });
+
+        expect(mock.something[0]).toEqual('a');
+        expect(mock.something[1]).toEqual('b');
+    });
+
+    test('can reference indexed properties without defining an array', () => {
+        const mock = MagicMock();
+
+        expect(mock.something.else[0]).not.toBeUndefined();
+    });
+
+    test('can invoke indexed propertes', () => {
+        const mock = MagicMock([]);
+
+        mock[0]('c', 'd');
+
+        expect(mock[0].__mock.calls[0].arguments).toEqual(
+            ['c', 'd']
+        );
+    });
+
+    test('can invoke deeply nested indexed propertes', () => {
+        const mock = MagicMock([]);
+
+        mock[0].whatever[2].yes('e', 'f');
+
+        expect(mock[0].whatever[2].yes.__mock.calls[0].arguments).toEqual(
+            ['e', 'f']
+        );
+    });
+
     describe('deleted keys', () => {
 
         test('purposefully deleted keys should remain deleted', () => {
@@ -177,9 +219,18 @@ describe('MagicMock suite', () => {
                 const mock = MagicMock();
 
                 mock.something(1, 'a');
+                mock.something.else(2, 'b');
 
                 expect(mock.__mock.called).toBe(false);
+                expect(mock.__mock.calls.length).toBe(0);
                 expect(mock.something.__mock.called).toBe(true);
+                expect(mock.something.__mock.calls.length).toBe(1);
+                expect(mock.something.__mock.calls[0].arguments)
+                    .toEqual([1, 'a']);
+                expect(mock.something.else.__mock.called).toBe(true);
+                expect(mock.something.else.__mock.calls.length).toBe(1);
+                expect(mock.something.else.__mock.calls[0].arguments)
+                    .toEqual([2, 'b']);
             });
         });
     });
