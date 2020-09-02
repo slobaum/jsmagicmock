@@ -14,24 +14,25 @@
     var isUndefined = type.bind(null, 'undefined');
     var isObject = type.bind(null, 'object');
     var isFunction = type.bind(null, 'function');
-    var emptyReturnValue = {};
+    var unsetReturnValueSymbol = Symbol('unsetReturnValue');
 
-    return function MagicMock(prototype) {
+    return function MagicMock(mocked) {
         var deletedProps = {};
         var calls = [];
-        var returnValue = emptyReturnValue;
+        var returnValue = unsetReturnValueSymbol;
+        // var prototype = Object.getPrototypeOf(mocked);
 
-        prototype = isUndefined(prototype)
+        mocked = isUndefined(mocked)
             ? function() {}
-            : prototype;
+            : mocked;
 
-        if (isObject(prototype)) {
+        if (isObject(mocked)) {
             // this converts the object into a callable with all the same properties
-            prototype = Object.keys(prototype).reduce(
+            mocked = Object.keys(mocked).reduce(
                 function (acc, key) {
-                    acc[key] = isObject(prototype[key]) || isFunction(prototype[key])
-                        ? MagicMock(prototype[key])
-                        : prototype[key];
+                    acc[key] = isObject(mocked[key]) || isFunction(mocked[key])
+                        ? MagicMock(mocked[key])
+                        : mocked[key];
 
                     return acc;
                 },
@@ -46,7 +47,7 @@
             return obj[key];
         }
 
-        return new Proxy(prototype, {
+        return new Proxy(mocked, {
             has: ensureKey,
             get: function(obj, key) {
                 if (key === '__mock') {
@@ -55,17 +56,13 @@
                         calls: calls,
                         called: !!calls.length,
                         returnValue: function(value) {
-                            returnValue = value;
+                            return returnValue = value;
                         }
                     };
                 }
 
-                // if (key === 'toString') {
-                //     var actualProto = Object.getPrototypeOf(obj)
-
-                //     if (actualProto && actualProto.toString) {
-                //         return actualProto.toString.bind(obj);
-                //     }
+                // if (key === 'toString' && prototype && isFunction(prototype.toString)) {
+                //     return prototype.toString.bind(obj);
                 // }
 
                 return ensureKey(obj, key);
@@ -86,7 +83,7 @@
                     arguments: args,
                 });
 
-                if (returnValue !== emptyReturnValue)
+                if (returnValue !== unsetReturnValueSymbol)
                     return returnValue;
 
                 return func.apply(scope, args);

@@ -40,10 +40,54 @@ describe('MagicMock suite', () => {
         expect(mock.something.what.yes.i.made.all.this.up).toBe('something');
     });
 
+    it('should allow invocation of arbitrarily assigned keys', () => {
+        const mock = MagicMock();
+
+        expect(() => {
+            mock.something.what.yes.i.made.all.this.up();
+            mock.__blarg_.yes.sure.whynot();
+        }).not.toThrow();
+    });
+
     // it('should correctly implement toString', () => {
     //     const literal = {something: 'what'};
     //     const mock = MagicMock(literal);
 
     //     expect(mock.toString()).toEqual(literal.toString());
     // });
+
+    describe('mock API', () => {
+
+        describe('with no calls', () => {
+
+            it('should have an empty calls array', () => {
+                const mock = MagicMock();
+    
+                expect(mock.__mock.calls).toEqual([]);
+            });
+
+            it('should have a a property `called` that is false', () => {
+                const mock = MagicMock();
+    
+                expect(mock.__mock.called).toBe(false);
+            });
+
+        });
+
+        describe('with calls', () => {
+
+            it('number of entry in calls should match number of function calls', () => {
+                const mock = MagicMock();
+
+                mock();
+                mock();
+                mock();
+
+                expect(mock.__mock.calls.length).toBe(3);
+            });
+
+        });
+
+    });
+
 });
