@@ -1,7 +1,7 @@
 {
   "name": "jsmagicmock",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
+  "description": "A JavaScript implementation of Python's MagicMock. No dependencies, no build system, framework agnostic.",
   "main": "src/index.js",
   "files": [
     "LICENSE.txt",
@@ -24,6 +24,6 @@
   "homepage": "https://github.com/slobaum/jsmagicmock#readme",
   "keywords": [],
   "devDependencies": {
-    "jest": "26.4.2"
+    "jest": "29.7.0"
   }
 }
