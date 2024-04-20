@@ -1,8 +1,5 @@
-// eslint-disable-next-line no-unused-vars
 (function (root, factory) {
-    // eslint-disable-next-line no-undef
     if (typeof define === 'function' && define.amd) {
-        // eslint-disable-next-line no-undef
         define([], factory);
     } else if (typeof exports === 'object') {
         module.exports = factory();
@@ -17,7 +14,7 @@
     var unsetReturnValueSymbol = Symbol('unsetReturnValue');
 
     return function MagicMock(mocked) {
-        var deletedProps = {};
+        var deletedProps = new Set();
         var calls = [];
         var returnValue = unsetReturnValueSymbol;
 
@@ -40,7 +37,7 @@
         }
 
         function ensureKey(obj, key) {
-            if (!obj[key] && !deletedProps[key])
+            if (!obj[key] && !deletedProps.has(key))
                 obj[key] = MagicMock();
 
             return obj[key];
@@ -63,8 +60,8 @@
                 return ensureKey(obj, key);
             },
             set: function(obj, key, value) {
-                if (deletedProps[key])
-                    delete deletedProps[key];
+                if (deletedProps.has(key))
+                    deletedProps.delete(key);
 
                 return obj[key] = (
                     isObject(value) || isFunction(value)
@@ -84,7 +81,7 @@
                 return func.apply(scope, args);
             },
             deleteProperty: function(obj, key) {
-                deletedProps[key] = true;
+                deletedProps.add(key);
                 delete obj[key];
             }
         });
