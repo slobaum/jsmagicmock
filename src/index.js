@@ -13,10 +13,11 @@
     var isFunction = type.bind(null, 'function');
     var unsetReturnValueSymbol = Symbol('unsetReturnValue');
 
-    return function MagicMock(mocked) {
+    return function MagicMock(mocked, options) {
         var deletedProps = new Set();
         var calls = [];
         var returnValue = unsetReturnValueSymbol;
+        var metaKey = (options || {}).metaKey || 'mock';
 
         mocked = isUndefined(mocked)
             ? function() {}
@@ -27,7 +28,7 @@
             mocked = Object.keys(mocked).reduce(
                 function (acc, key) {
                     acc[key] = isObject(mocked[key]) || isFunction(mocked[key])
-                        ? MagicMock(mocked[key])
+                        ? MagicMock(mocked[key], options)
                         : mocked[key];
 
                     return acc;
@@ -38,7 +39,7 @@
 
         function ensureKey(obj, key) {
             if (!obj[key] && !deletedProps.has(key))
-                obj[key] = MagicMock();
+                obj[key] = MagicMock(undefined, options);
 
             return obj[key];
         }
@@ -46,7 +47,7 @@
         return new Proxy(mocked, {
             has: ensureKey,
             get: function(obj, key) {
-                if (key === '__mock') {
+                if (key === metaKey) {
                     // mock API
                     return {
                         calls: calls,
@@ -65,7 +66,7 @@
 
                 return obj[key] = (
                     isObject(value) || isFunction(value)
-                        ? MagicMock(value)
+                        ? MagicMock(value, options)
                         : value
                 );
             },

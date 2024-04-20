@@ -138,7 +138,7 @@ test('can invoke indexed propertes', () => {
 
     mock[0]('c', 'd');
 
-    expect(mock[0].__mock.calls[0].arguments).toEqual(
+    expect(mock[0].mock.calls[0].arguments).toEqual(
         ['c', 'd']
     );
 });
@@ -148,7 +148,7 @@ test('can invoke deeply nested indexed propertes', () => {
 
     mock[0].whatever[2].yes('e', 'f');
 
-    expect(mock[0].whatever[2].yes.__mock.calls[0].arguments).toEqual(
+    expect(mock[0].whatever[2].yes.mock.calls[0].arguments).toEqual(
         ['e', 'f']
     );
 });
@@ -202,7 +202,7 @@ describe('setting return values', () => {
     test('should return value specified via returnValue', () => {
         const mock = MagicMock();
 
-        mock.__mock.returnValue('asdf')
+        mock.mock.returnValue('asdf')
 
         expect(mock()).toEqual('asdf');
     });
@@ -211,7 +211,7 @@ describe('setting return values', () => {
         const mock = MagicMock();
         const testReturnValue = Symbol('test-symbol');
 
-        mock.__mock.returnValue(testReturnValue)
+        mock.mock.returnValue(testReturnValue)
 
         expect(mock()).toEqual(testReturnValue);
     });
@@ -219,7 +219,7 @@ describe('setting return values', () => {
     test('deeply nested entities should respect returnValue', () => {
         const mock = MagicMock();
 
-        mock.i.made.this.up.__mock.returnValue('asdf')
+        mock.i.made.this.up.mock.returnValue('asdf')
 
         expect(mock.i.made.this.up()).toEqual('asdf');
     });
@@ -230,13 +230,13 @@ describe('with no calls', () => {
     test('should have an empty calls array', () => {
         const mock = MagicMock();
 
-        expect(mock.__mock.calls).toEqual([]);
+        expect(mock.mock.calls).toEqual([]);
     });
 
     test('should have a property `called` that is false', () => {
         const mock = MagicMock();
 
-        expect(mock.__mock.called).toBe(false);
+        expect(mock.mock.called).toBe(false);
     });
 
 });
@@ -250,7 +250,7 @@ describe('with calls', () => {
         mock();
         mock();
 
-        expect(mock.__mock.calls.length).toBe(3);
+        expect(mock.mock.calls.length).toBe(3);
     });
 
     test('should have a property `called` that is true', () => {
@@ -258,7 +258,7 @@ describe('with calls', () => {
 
         mock();
 
-        expect(mock.__mock.called).toBe(true);
+        expect(mock.mock.called).toBe(true);
     });
 
     test('each call arguments should be available', () => {
@@ -267,11 +267,11 @@ describe('with calls', () => {
         mock.something(1, 'a');
         mock.something(2, 'b');
 
-        expect(mock.something.__mock.calls[0].arguments)
+        expect(mock.something.mock.calls[0].arguments)
             .toEqual([1, 'a']);
-        expect(mock.something.__mock.calls[1].arguments)
+        expect(mock.something.mock.calls[1].arguments)
             .toEqual([2, 'b']);
-        expect(mock.something.__mock.calls[2])
+        expect(mock.something.mock.calls[2])
             .toBeUndefined();
     });
 
@@ -281,17 +281,49 @@ describe('with calls', () => {
         mock.something(1, 'a');
         mock.something.else(2, 'b');
 
-        expect(mock.__mock.called).toBe(false);
-        expect(mock.__mock.calls.length).toBe(0);
-        expect(mock.something.__mock.called).toBe(true);
-        expect(mock.something.__mock.calls.length).toBe(1);
-        expect(mock.something.__mock.calls[0].arguments)
+        expect(mock.mock.called).toBe(false);
+        expect(mock.mock.calls.length).toBe(0);
+        expect(mock.something.mock.called).toBe(true);
+        expect(mock.something.mock.calls.length).toBe(1);
+        expect(mock.something.mock.calls[0].arguments)
             .toEqual([1, 'a']);
-        expect(mock.something.else.__mock.called).toBe(true);
-        expect(mock.something.else.__mock.calls.length).toBe(1);
-        expect(mock.something.else.__mock.calls[0].arguments)
+        expect(mock.something.else.mock.called).toBe(true);
+        expect(mock.something.else.mock.calls.length).toBe(1);
+        expect(mock.something.else.mock.calls[0].arguments)
             .toEqual([2, 'b']);
     });
 });
 ```
 
+If you don't like where this key exists, you can name it anything you want by configuring it when your mock is constructed.
+
+```
+test('should return value specified via returnValue', () => {
+    const mock = MagicMock(undefined, { metaKey: '___meta' });
+
+    mock.___meta.returnValue('asdf')
+
+    expect(mock()).toEqual('asdf');
+});
+test('deeply nested entities should respect returnValue', () => {
+    const mock = MagicMock(undefined, { metaKey: '___meta' });
+
+    mock.i.made.this.up.___meta.returnValue('asdf')
+
+    expect(mock.i.made.this.up()).toEqual('asdf');
+});
+test('should have an empty calls array', () => {
+    const mock = MagicMock(undefined, { metaKey: '___meta' });
+
+    expect(mock.___meta.calls).toEqual([]);
+});
+test('number of entry in calls should match number of function calls', () => {
+    const mock = MagicMock(undefined, { metaKey: '___meta' });
+
+    mock();
+    mock();
+    mock();
+
+    expect(mock.___meta.calls.length).toBe(3);
+});
+```
